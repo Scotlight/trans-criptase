@@ -9,8 +9,10 @@ import { pathToFileURL, fileURLToPath } from 'node:url'
 // 这样插件装到别处（marketplace / --plugin-dir / 任意目录）也能定位 config 与 index。
 export const SKILL_DIR = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 export const CONFIG_PATH = path.join(SKILL_DIR, 'embed-config.json')
-export const INDEX_ROOT = path.join(SKILL_DIR, 'index')
-export const PROJECTS_ROOT = path.join(os.homedir(), '.claude', 'projects')
+// INDEX_ROOT / PROJECTS_ROOT 允许被环境变量覆盖：默认走真实位置，
+// 但 smoke test 可指向临时目录，从而完全不碰用户的真实转录与索引（可复现、零污染）。
+export const INDEX_ROOT = process.env.TRANS_INDEX_ROOT || path.join(SKILL_DIR, 'index')
+export const PROJECTS_ROOT = process.env.TRANS_PROJECTS_ROOT || path.join(os.homedir(), '.claude', 'projects')
 
 export function loadConfig() {
     let cfg = {}

@@ -202,16 +202,62 @@ node scripts/semantic.mjs query "..." --exact                # pure keyword, no 
 node scripts/semantic.mjs query "..." --rerank               # add rerank
 node scripts/semantic.mjs query "..." --all                  # across all projects
 node scripts/semantic.mjs index                              # incremental index (seconds)
+node scripts/semantic.mjs projects                           # list known projects (real cwd) for cross-project search
+node scripts/semantic.mjs projects --query epub              # narrow by path/preview substring
 pwsh scripts/scan-transcript.ps1 -Id <session-prefix>        # resumption brief (also -List)
 ```
+
+**Cross-project search.** By default `query` / `index` only touch the current project. To pull a detail from a *different* project, first run `projects` to get that project's real working-directory path, then pass it explicitly:
+
+```powershell
+node scripts/semantic.mjs projects --query epub              # find the target project's real path
+node scripts/semantic.mjs query "font migration" --project "D:\path\to\that\project"
+```
+
+This targets one project instead of `--all` (which re-scans every index and degrades as projects accumulate).
 
 ### Auto-trigger hook
 
 The plugin ships a `UserPromptSubmit` hook (`scripts/prompt-hint.mjs`). Every time you send a message, it scans for continuation/recall intent — `昨天` / `上次` / `之前说` / `记得…做` / `接着上次` / `恢复会话`, plus English `last time` / `pick up where` / `previous session`, and bare session-UUID fragments. On a hit it injects one advisory line into the model's context suggesting `trans_scan` / `trans_search`; the model reads your full message and decides whether it's actually needed. On a miss (or malformed input) it exits silently with zero side effects. Nothing fires automatically — the hook only *suggests*.
 
+**Which hooks fire, and when:**
+
+| Hook | Fires | What it does | Blocking? |
+|---|---|---|---|
+| `UserPromptSubmit` (`prompt-hint.mjs`) | every message you send | injects one advisory line on an intent hit; silent no-op otherwise | no — self-terminates after a 3s safety timeout, and a miss returns instantly |
+| `SessionEnd` (`session-end-index.mjs`) | when a session ends | spawns a **detached** background process to incrementally index the just-ended session, then exits immediately | no — the index work runs in a child process that's `unref`'d, so it never delays session close |
+
+**Failure / timeout behavior:** both hooks are best-effort and fail open. `prompt-hint.mjs` wraps everything in try/catch, emits nothing on error, and has a hard 3-second `setTimeout` fallback so it can never hang your prompt. `session-end-index.mjs` only spawns an indexer for projects that already have an index (never blocks, never builds on first sight), and swallows any spawn error. If either hook is missing or broken, Claude Code proceeds normally — you just lose the suggestion / the background refresh.
+
+**Coexisting with other plugins:** these hooks are declared in the plugin's own `hooks/hooks.json` (via `${CLAUDE_PLUGIN_ROOT}`), **not** in your `settings.json`. Claude Code runs all registered `UserPromptSubmit` hooks, so ours composes additively with any you or another plugin define — it only ever *appends* `additionalContext`, never rewrites the prompt or short-circuits other hooks. Removing the plugin directory removes the hooks cleanly; nothing is left behind in `settings.json`.
+
 ### Search wisdom
 
 Rerank score < 0.5 = you didn't catch the real one. **Rephrase and re-search**, using the words the person actually used at the time: what "two windows overwriting each other" won't find, "another session clobbered my refactor" nails in one shot. For variable names and error strings, use `--exact`.
+
+### Verify install (smoke test)
+
+A hermetic, copy-paste smoke test that exercises the full pipeline — build index → recall a known needle → list projects → wipe → confirm it's gone — **without touching your real transcripts or index** (it runs entirely in a temp sandbox via `TRANS_PROJECTS_ROOT` / `TRANS_INDEX_ROOT` overrides). Keyword-only, so **no API key required**; Node-only, so it runs identically on Windows/macOS/Linux:
+
+```bash
+node test/smoke.mjs        # or: npm run smoke
+```
+
+Expected tail:
+
+```
+  ✓ query recalls the known needle
+  ✓ projects lists the real cwd
+  ✓ after wipe, needle is no longer recalled
+
+PASS — all smoke checks green
+```
+
+Unit tests (pure functions, also zero-dependency):
+
+```bash
+node --test test/lib.test.mjs   # or: npm test
+```
 
 ## Architecture
 

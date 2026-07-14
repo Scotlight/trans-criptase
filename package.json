@@ -1,0 +1,22 @@
+{
+  "name": "trans-criptase",
+  "version": "1.0.0",
+  "description": "Reverse-transcribe Claude Code session transcripts back into live context: resume dropped sessions and search across your history.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/lib.test.mjs",
+    "smoke": "node test/smoke.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Scotlight/trans-criptase.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Scotlight/trans-criptase/issues"
+  }
+}
