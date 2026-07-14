@@ -7,6 +7,10 @@
 
 > Make Claude Code remember what it already said.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/demo.svg" alt="trans resuming a dropped session inside Claude Code" width="760">
+</p>
+
 Every Claude Code session leaves a full transcript on disk (JSONL), but all you get officially is a flat `--resume` list — you can't find, search, or resume across it. transcriptase turns those dormant transcripts into two things: **a resumable scene**, and **a searchable memory**.
 
 The name comes from reverse transcriptase: others transcribe conversations into files; we reverse-transcribe files back into live context.
@@ -28,7 +32,7 @@ The breakpoint detail pins down "which step of which file you last touched, whic
 **3. Line-level context expansion**
 After a hit, pull the full records around `sessionId:line` (including tool calls and results) and **re-inject those old details into the current conversation** — instead of jumping off to resume a dead session whose context blew up long ago.
 
-All three are offered simultaneously as **MCP tools + CLI + Claude Code skill**: the model can call them itself (auto-search when you casually mention an old detail), and you can run them by hand.
+All three are offered simultaneously as **MCP tools + CLI + Claude Code skill**, with three ways to trigger them: run `/trans` explicitly, invoke the MCP tools directly, or let the `UserPromptSubmit` hook nudge the model — when your message hints at continuation ("last time…", "that session…", "接着上次…"), the hook injects a soft suggestion and the model decides whether a search/scan is actually warranted. Nothing fires behind your back; the hint is advisory, and you can always drive it by hand.
 
 ## Quick start
 
@@ -66,7 +70,7 @@ node scripts/semantic.mjs query "error text or a variable name" --exact   # work
 
 > **Don't want the key in a file?** Skip `-ApiKey` and set the env var `TRANS_EMBED_API_KEY` instead (`setx TRANS_EMBED_API_KEY "sk-xxx"` on Windows, or write it into your shell profile on macOS/Linux). It takes precedence over the config file, so the key never lands in a file, a conversation, or the transcript index. `TRANS_EMBED_BASE_URL` / `TRANS_EMBED_MODEL` etc. work the same way.
 
-Next new Claude Code session you'll get the `/trans:trans` skill, 5 MCP tools (`trans_search` / `trans_scan` / `trans_list` / `trans_expand` / `trans_index`), and background incremental indexing at the end of every session (the SessionEnd hook).
+Next new Claude Code session you'll get the `/trans:trans` skill, 5 MCP tools (`trans_search` / `trans_scan` / `trans_list` / `trans_expand` / `trans_index`), a `UserPromptSubmit` hook that hints at continuation intent, and background incremental indexing at the end of every session (the SessionEnd hook).
 
 > **Why clone into `~/.claude/skills/trans` rather than "anywhere + an install script"?** Because a skills-dir plugin auto-loads from that location. This way the hook is defined in the plugin's own `hooks/hooks.json`, physically isolated from your `settings.json` — swapping providers or rewriting `settings.json` won't clobber it. The folder must be named `trans` (scripts and index are located by it).
 >
@@ -156,7 +160,9 @@ export TRANS_EMBED_API_KEY=sk-xxx     # macOS/Linux, write into your shell rc
 
 ## Usage
 
-### MCP tools (recommended, model calls them automatically)
+### MCP tools
+
+The model may call these on its own when the context calls for it (the `UserPromptSubmit` hook can nudge it toward a search/scan — see below), or you can invoke them explicitly.
 
 | Tool | Does what |
 |---|---|
@@ -176,6 +182,10 @@ node scripts/semantic.mjs query "..." --all                  # across all projec
 node scripts/semantic.mjs index                              # incremental index (seconds)
 pwsh scripts/scan-transcript.ps1 -Id <session-prefix>        # resumption brief (also -List)
 ```
+
+### Auto-trigger hook
+
+The plugin ships a `UserPromptSubmit` hook (`scripts/prompt-hint.mjs`). Every time you send a message, it scans for continuation/recall intent — `昨天` / `上次` / `之前说` / `记得…做` / `接着上次` / `恢复会话`, plus English `last time` / `pick up where` / `previous session`, and bare session-UUID fragments. On a hit it injects one advisory line into the model's context suggesting `trans_scan` / `trans_search`; the model reads your full message and decides whether it's actually needed. On a miss (or malformed input) it exits silently with zero side effects. Nothing fires automatically — the hook only *suggests*.
 
 ### Search wisdom
 
@@ -204,11 +214,11 @@ query: vector dot-product top200 ─┐
 ~/.claude/skills/trans/           ← clone here; skills-dir plugin auto-loads
 ├── .claude-plugin/plugin.json    plugin manifest (name=trans → namespace /trans:trans)
 ├── SKILL.md                      session-resumption skill
-├── hooks/hooks.json              SessionEnd → background incremental index (no settings.json)
+├── hooks/hooks.json              UserPromptSubmit → continuation-intent hint; SessionEnd → background incremental index (no settings.json)
 ├── .mcp.json                     plugin-level MCP declaration (not required if you use claude mcp add)
 ├── embed-config.json             your config (has the key, blocked by .gitignore)
 ├── index/                        vector index (plaintext chunks, blocked by .gitignore)
-├── scripts/                      lib.mjs / mcp-server.mjs / semantic.mjs / session-end-index.mjs / scan-transcript.ps1
+├── scripts/                      lib.mjs / mcp-server.mjs / semantic.mjs / prompt-hint.mjs / session-end-index.mjs / scan-transcript.ps1
 └── embedder/                     local-model option (transformers.js + your own model files)
 ```
 
