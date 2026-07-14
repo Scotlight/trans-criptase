@@ -37,19 +37,19 @@ Claude Code 的每个会话都会在本地留下完整转录（JSONL），但官
 **1. 说一句"昨天干了啥"，它自己就把会话翻出来续上。** `昨天` 命中触发提示，模型连着调 `trans`，逐个往前扫会话（最近那个只是 `/plugin` 命令，于是继续往前挖），最后交出昨天六个会话的实质总结。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-1-auto-resume.png" alt="问昨天干了啥，trans 自动往前扫会话并总结" width="760">
+  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-1-auto-resume-zh.png" alt="问昨天干了啥，trans 自动往前扫会话并总结" width="760">
 </p>
 
 **2. 词表命中也不会误触发。** "昨天天气"同样含 `昨天`，hook 照样注入了提示——但模型读完整条消息，发现跟会话历史无关，于是反问你所在城市，而不是瞎调工具。提示只是建议，正如设计。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-2-no-false-trigger.png" alt="问昨天天气不会触发工具调用，模型改为反问城市" width="760">
+  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-2-no-false-trigger-zh.png" alt="问昨天天气不会触发工具调用，模型改为反问城市" width="760">
 </p>
 
 **3. 让它别用工具，它老实承认查不了。** 明确说"不用任何工具/插件/skills/MCP"，它坦白自己没有昨天的记忆、也够不到 `git log` 或文件系统——然后主动提出可以**用**这些工具帮你查。这正是 transcriptase 要解决的基线。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-3-no-tools-baseline.png" alt="被要求不用工具时，模型老实说查不了昨天并建议 git log 或 trans 插件" width="760">
+  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-3-no-tools-baseline-zh.png" alt="被要求不用工具时，模型老实说查不了昨天并建议 git log 或 trans 插件" width="760">
 </p>
 
 
