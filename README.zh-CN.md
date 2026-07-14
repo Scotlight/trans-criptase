@@ -214,21 +214,6 @@ index/<项目>/  meta.jsonl + vec.bin      切块明文 + 归一化向量(二进
 
 三种组件的注册方式各不相同，这是**刻意设计**：hook 走插件自带的 `hooks/hooks.json`，与你的 `settings.json` 物理隔离（频繁换供应商、重写 settings 都冲不掉它）；skill 随插件目录自动加载；MCP 走一条 `claude mcp add`，全局无条件挂载最稳。脚本用 `import.meta.url` 推导自身位置，所以插件装到任何路径都能定位 config 与 index。
 
-## 与 ccsearch 的区别
-
-[ccsearch](https://github.com/madzarm/ccsearch)（Rust）是很好的**会话启动器**：搜到 → 回车 → `claude --resume`。transcriptase 解决的是另一半问题：
-
-| | ccsearch | transcriptase |
-|---|---|---|
-| 定位 | 找回会话并跳转 | 把细节召回**当前对话** |
-| 粒度 | 会话级 | 行级（`会话ID:行号` + 上下文放大） |
-| 中文 | 弱（英文向量模型 + FTS5 不切中文） | 原生（子串免分词 + bge-m3/多语模型） |
-| 断点续接 | 无 | 五段续接情报，精确到未落盘的编辑 |
-| embedding | 本地 MiniLM（固定） | 远程任意 OpenAI 兼容 / 本地 ONNX / 纯关键词三档 |
-| 调用方 | 人（TUI） | 模型（MCP）+ 人（CLI/skill） |
-
-RRF 混合检索的思路来自 ccsearch，致谢。
-
 ## FAQ
 
 **Q: HuggingFace 模型下载 403？**

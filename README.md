@@ -214,21 +214,6 @@ query: vector dot-product top200 ─┐
 
 The three components register in different ways, **by design**: the hook goes through the plugin's own `hooks/hooks.json`, physically isolated from your `settings.json` (swapping providers or rewriting settings can't clobber it); the skill auto-loads with the plugin directory; MCP goes through one `claude mcp add` for rock-solid unconditional global mounting. Scripts derive their own location via `import.meta.url`, so the plugin locates config and index no matter where it's installed.
 
-## vs. ccsearch
-
-[ccsearch](https://github.com/madzarm/ccsearch) (Rust) is a fine **session launcher**: search → enter → `claude --resume`. transcriptase solves the other half:
-
-| | ccsearch | transcriptase |
-|---|---|---|
-| Focus | find a session and jump to it | recall details **into the current conversation** |
-| Granularity | session-level | line-level (`sessionId:line` + context expansion) |
-| Chinese | weak (English vector model + FTS5 doesn't tokenize CJK) | native (substring needs no tokenizer + bge-m3/multilingual models) |
-| Resumption | none | five-part brief, down to the unsaved edit |
-| Embedding | local MiniLM (fixed) | remote any-OpenAI-compatible / local ONNX / pure keyword — three tiers |
-| Caller | human (TUI) | model (MCP) + human (CLI/skill) |
-
-The RRF hybrid-search idea comes from ccsearch — thanks to it.
-
 ## FAQ
 
 **Q: HuggingFace model download returns 403?**
