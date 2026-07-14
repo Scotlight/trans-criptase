@@ -2,6 +2,13 @@
 // trans UserPromptSubmit hook：扫用户输入的续接意图词，
 // 命中则往上下文注入提示，让 AI 自行决定是否调 trans_scan / trans_search。
 // 不命中 → 静默退出，零副作用。
+import { writeFileSync, appendFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+
+// ── 调试日志（确认 hook 是否被 Claude Code 调起）──
+const LOG = join(homedir(), '.claude', 'trans-hook-debug.log')
+const log = (msg) => { try { appendFileSync(LOG, `[${new Date().toISOString()}] ${msg}\n`) } catch {} }
 
 // ── 续接意图正则（三组：中文 / 英文 / 会话ID）──
 // 设计取向：软提示，宁可多命中让 AI 自行判断，也不要漏掉口语化的回顾问句。
@@ -24,13 +31,17 @@ process.stdin.on('data', d => { raw += d })
 process.stdin.on('end', () => {
   try {
     const { prompt } = JSON.parse(raw || '{}')
-    if (!prompt || typeof prompt !== 'string') { process.exit(0) }
+    log(`prompt=${JSON.stringify((prompt||'').slice(0,80))}`)
+    if (!prompt || typeof prompt !== 'string') { log('exit: no prompt'); process.exit(0) }
 
     if (hasIntent(prompt)) {
+      log('HIT → injecting hint')
       const hint = [
-        '[trans 插件提示] 检测到疑似续接/回忆意图。',
-        '你可以调用 trans_scan（恢复上次会话断点）或 trans_search（检索历史对话细节）来帮助用户。',
-        '请根据用户完整消息判断是否真的需要——如果用户只是随口提到"之前"但不需要历史上下文，忽略本提示即可。',
+        '[trans plugin] The user\'s message likely references a past session or prior work.',
+        'You have the trans_scan and trans_search MCP tools available.',
+        'Use trans_scan to retrieve a resumption brief from a recent session, or trans_search to find specific details across session history.',
+        'DO call one of these tools unless you are absolutely certain the user is NOT asking about prior session context.',
+        'Memory files alone cannot substitute for session transcript search — they only store what was explicitly saved.',
       ].join(' ')
       process.stdout.write(JSON.stringify({
         hookSpecificOutput: {
@@ -39,7 +50,8 @@ process.stdin.on('end', () => {
         }
       }) + '\n')
     }
-  } catch { }
+    log('miss → silent exit')
+  } catch (e) { log(`error: ${e.message}`) }
   process.exit(0)
 })
 setTimeout(() => process.exit(0), 3000)

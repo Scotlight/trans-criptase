@@ -8,7 +8,7 @@
     {
       "name": "trans",
       "source": "./",
-      "description": "转录续接 + 跨会话语义检索：读旧会话 JSONL 提取「原任务→已完成→断点→剩余」续接，并支持关键词/向量/混合检索与行级放大回注当前对话。",
+      "description": "Session transcript resume + cross-session semantic search: read old session JSONL, extract ORIGINAL TASK → DONE → BREAKPOINT → REMAINING for resumption, plus keyword/vector/hybrid search with line-level context expansion.",
       "homepage": "https://github.com/Scotlight/trans-criptase",
       "repository": "https://github.com/Scotlight/trans-criptase",
       "license": "MIT",
