@@ -1,0 +1,12 @@
+# 默认自动处理行尾
+* text=auto
+
+# Shell 脚本必须保持 LF，否则 CRLF 会让 bash 报 `\r` 错误
+*.sh text eol=lf
+
+# PowerShell 脚本用 CRLF（Windows 原生）
+*.ps1 text eol=crlf
+
+# 二进制/模型文件不做行尾转换
+*.onnx binary
+*.bin binary

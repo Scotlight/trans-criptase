@@ -1,0 +1,14 @@
+{
+    "provider": "api",
+    "baseUrl": "https://your-openai-compatible-endpoint/v1",
+    "apiKey": "",
+    "model": "BAAI/bge-m3",
+    "rerankModel": "BAAI/bge-reranker-v2-m3",
+    "localEmbedder": "embedder/embedder.mjs",
+    "localDtype": "q8",
+    "batchSize": 32,
+    "maxChars": 800,
+    "stride": 720,
+    "autoRefresh": true,
+    "autoRefreshMaxChunks": 300
+}

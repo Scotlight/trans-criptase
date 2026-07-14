@@ -1,0 +1,13 @@
+# 真实配置（含 key）绝不入库
+embed-config.json
+
+# 索引数据 = 你全部对话的明文切块
+index/
+
+# 本地模型与依赖
+embedder/models/*
+!embedder/models/.gitkeep
+embedder/node_modules/
+node_modules/
+
+*.log

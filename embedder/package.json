@@ -1,0 +1,9 @@
+{
+    "name": "transcriptase-embedder",
+    "private": true,
+    "type": "module",
+    "description": "本地 ONNX 嵌入器（可选组件，模型文件自备见 docs/local-model.md）",
+    "dependencies": {
+        "@huggingface/transformers": "^3.0.0"
+    }
+}
