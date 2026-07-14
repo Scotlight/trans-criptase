@@ -2,13 +2,6 @@
 // trans UserPromptSubmit hook：扫用户输入的续接意图词，
 // 命中则往上下文注入提示，让 AI 自行决定是否调 trans_scan / trans_search。
 // 不命中 → 静默退出，零副作用。
-import { writeFileSync, appendFileSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
-
-// ── 调试日志（确认 hook 是否被 Claude Code 调起）──
-const LOG = join(homedir(), '.claude', 'trans-hook-debug.log')
-const log = (msg) => { try { appendFileSync(LOG, `[${new Date().toISOString()}] ${msg}\n`) } catch {} }
 
 // ── 续接意图正则（三组：中文 / 英文 / 会话ID）──
 // 设计取向：软提示，宁可多命中让 AI 自行判断，也不要漏掉口语化的回顾问句。
@@ -31,11 +24,9 @@ process.stdin.on('data', d => { raw += d })
 process.stdin.on('end', () => {
   try {
     const { prompt } = JSON.parse(raw || '{}')
-    log(`prompt=${JSON.stringify((prompt||'').slice(0,80))}`)
-    if (!prompt || typeof prompt !== 'string') { log('exit: no prompt'); process.exit(0) }
+    if (!prompt || typeof prompt !== 'string') { process.exit(0) }
 
     if (hasIntent(prompt)) {
-      log('HIT → injecting hint')
       const hint = [
         '[trans plugin] The user\'s message likely references a past session or prior work.',
         'You have the trans_scan and trans_search MCP tools available.',
@@ -50,8 +41,7 @@ process.stdin.on('end', () => {
         }
       }) + '\n')
     }
-    log('miss → silent exit')
-  } catch (e) { log(`error: ${e.message}`) }
+  } catch { }
   process.exit(0)
 })
 setTimeout(() => process.exit(0), 3000)
