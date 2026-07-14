@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" font-family="'Cascadia Code', ui-monospace, 'DejaVu Sans Mono', Consolas, monospace">
+  <defs>
+    <clipPath id="win"><rect x="0" y="0" width="800" height="600" rx="6"/></clipPath>
+    <clipPath id="typeCmd"><rect x="34" y="64" width="0" height="20">
+      <animate attributeName="width" values="0;0;96;96" keyTimes="0;0.02;0.07;1" dur="16s" repeatCount="indefinite"/>
+    </rect></clipPath>
+  </defs>
+
+  <g clip-path="url(#win)">
+    <!-- ===== terminal background ===== -->
+    <rect x="0" y="0" width="800" height="600" fill="#0d0d0d"/>
+
+    <!-- ===== Windows Terminal tab bar ===== -->
+    <rect x="0" y="0" width="800" height="26" fill="#191919"/>
+    <rect x="8" y="4" width="150" height="22" rx="4" fill="#0d0d0d"/>
+    <circle cx="24" cy="15" r="2.5" fill="#e0956b"/>
+    <text x="34" y="19" font-size="12" fill="#c9d1d9">Claude Code</text>
+    <text x="170" y="19" font-size="13" fill="#6b7178">+</text>
+    <text x="742" y="19" font-size="12" fill="#6b7178">—  ▢  ✕</text>
+
+    <!-- ===== Claude Code header (path) ===== -->
+    <g>
+      <rect x="18" y="37" width="4" height="12" fill="#e06c56"/>
+      <rect x="25" y="37" width="4" height="12" fill="#e06c56"/>
+      <text x="40" y="47" font-size="13" fill="#7d8590">D:\0010\.A_project\epub reader</text>
+    </g>
+
+    <!-- ===== user line ===== -->
+    <rect x="0" y="62" width="800" height="24" fill="#16181c"/>
+    <rect x="0" y="62" width="3" height="24" fill="#3a4048"/>
+    <text x="14" y="79" font-size="14"><tspan fill="#6b7178">&gt; </tspan></text>
+    <g clip-path="url(#typeCmd)">
+      <text x="34" y="79" font-size="14" fill="#e6e6e6">/trans</text>
+    </g>
+    <rect x="90" y="66" width="8" height="15" fill="#8a9199">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.07;0.071;0.11;0.111;1" dur="16s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.45;0.5;0.9;1" dur="0.9s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- ===== thought status ===== -->
+    <text x="14" y="112" font-size="14" fill="#5c636b" opacity="0">Thought for 4s
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- ===== scanning ===== -->
+    <text x="14" y="140" font-size="14" opacity="0"><tspan fill="#c78a52">●</tspan><tspan fill="#c9d1d9"> Scanning recent sessions for a resume point…</tspan>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- ===== tool call ===== -->
+    <text x="14" y="168" font-size="14" opacity="0"><tspan fill="#c78a52">●</tspan><tspan fill="#c9d1d9"> Bash</tspan><tspan fill="#6b7178">(node scripts/scan-transcript.mjs --id a3f8b1c2)</tspan>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.185;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="30" y="188" font-size="14" fill="#6b7178" opacity="0">⎿  session a3f8b1c2 · 1,204 lines · last active 2h ago
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.21;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="52" y="208" font-size="14" fill="#6b7178" opacity="0">reconstructed 5-part briefing
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.225;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- ===== briefing intro ===== -->
+    <text x="14" y="240" font-size="14" opacity="0"><tspan fill="#c78a52">●</tspan><tspan fill="#c9d1d9"> Here's where the last session broke off:</tspan>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.265;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- ORIGINAL TASK -->
+    <text x="30" y="272" font-size="13" fill="#6b7178" opacity="0">ORIGINAL TASK
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.295;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="48" y="292" font-size="14" fill="#c9d1d9" opacity="0">migrate reader fonts to a dedicated readerFonts table
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.308;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- DONE -->
+    <text x="30" y="324" font-size="13" fill="#6b7178" opacity="0">DONE
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.338;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="48" y="344" font-size="14" fill="#c9d1d9" opacity="0"><tspan fill="#5bbf5b">·</tspan> created readerFonts store, sha256 keys
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.351;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="48" y="364" font-size="14" fill="#c9d1d9" opacity="0"><tspan fill="#5bbf5b">·</tspan> lazy per-entry migration, out of versionchange
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.364;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- BREAKPOINT -->
+    <text x="30" y="396" font-size="13" opacity="0"><tspan fill="#d18f52">BREAKPOINT</tspan><tspan fill="#6b7178">  · last edit never landed</tspan>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.404;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="48" y="416" font-size="14" opacity="0"><tspan fill="#c9d1d9">Edit  </tspan><tspan fill="#4ec9b0">src/engine/fontMigrate.ts:88</tspan>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.424;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="48" y="436" font-size="14" fill="#8a9199" opacity="0">"rebuild the index AFTER the row copy" — not saved
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.444;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- REMAINING -->
+    <text x="30" y="468" font-size="13" fill="#6b7178" opacity="0">REMAINING
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.474;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="48" y="488" font-size="14" fill="#c9d1d9" opacity="0"><tspan fill="#6b7178">·</tspan> fix rebuild ordering in fontMigrate.ts
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.487;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+    <text x="48" y="508" font-size="14" fill="#c9d1d9" opacity="0"><tspan fill="#6b7178">·</tspan> re-run the migration test
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.50;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- closing -->
+    <text x="14" y="540" font-size="14" opacity="0"><tspan fill="#c78a52">●</tspan><tspan fill="#c9d1d9"> Pick up from the unsaved edit at fontMigrate.ts:88?</tspan>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.54;0.955;1" dur="16s" repeatCount="indefinite" calcMode="discrete"/>
+    </text>
+
+    <!-- ===== bottom status bar ===== -->
+    <rect x="0" y="566" width="800" height="34" fill="#0d0d0d"/>
+    <rect x="0" y="566" width="800" height="1" fill="#1c1c1c"/>
+    <text x="14" y="580" font-size="12">
+      <tspan fill="#d670d6">◆ </tspan><tspan fill="#c9d1d9">Opus 4.8 1M</tspan><tspan fill="#3a3a3a">  │  </tspan><tspan fill="#d4a72c">▣ epub reader</tspan><tspan fill="#3a3a3a">  │  </tspan><tspan fill="#5bbf5b">⎇ main ●</tspan><tspan fill="#3a3a3a">  │  </tspan><tspan fill="#d670d6">5.3%</tspan><tspan fill="#8a9199"> · </tspan><tspan fill="#ca8a54">52.8k tokens</tspan><tspan fill="#3a3a3a">  │  </tspan><tspan fill="#4ec9b0">5m14s</tspan><tspan fill="#3a3a3a">  │  </tspan><tspan fill="#d670d6">default</tspan>
+    </text>
+    <text x="14" y="595" font-size="12" fill="#5c636b">⏸ manual mode on · ← for agents</text>
+  </g>
+</svg>
