@@ -34,6 +34,28 @@ After a hit, pull the full records around `sessionId:line` (including tool calls
 
 All three are offered simultaneously as **MCP tools + CLI + Claude Code skill**, with three ways to trigger them: run `/trans` explicitly, invoke the MCP tools directly, or let the `UserPromptSubmit` hook nudge the model — when your message hints at continuation ("last time…", "that session…", "接着上次…"), the hook injects a soft suggestion and the model decides whether a search/scan is actually warranted. Nothing fires behind your back; the hint is advisory, and you can always drive it by hand.
 
+## See it in action
+
+Real screenshots, not mockups. The point of the hook is that it *suggests* — the model still decides.
+
+**1. Say "what did I do yesterday?" and it resumes on its own.** The `昨天` trigger fires the hint; the model calls `trans` repeatedly, walks back through your sessions (the newest one was just a `/plugin` command, so it keeps digging), and hands back a real summary of yesterday's six sessions.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-1-auto-resume.png" alt="asking what did I do yesterday triggers trans to scan back through sessions and summarize" width="760">
+</p>
+
+**2. It does NOT fire on a false positive.** "Yesterday's weather" also contains `昨天`, so the hook still injects its hint — but the model reads the whole message, sees it has nothing to do with session history, and asks for your city instead of blindly calling the tool. The hint is advisory, exactly as designed.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-2-no-false-trigger.png" alt="asking about yesterday's weather does not trigger a tool call — the model asks for the city instead" width="760">
+</p>
+
+**3. Ask it to work without tools and it's honest about the gap.** Tell it "don't use any tools/plugins/skills/MCP" and it admits it has no memory of yesterday and can't reach `git log` or the filesystem — then offers to look it up *with* those tools. That's the baseline transcriptase exists to fix.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Scotlight/trans-criptase/main/assets/showcase-3-no-tools-baseline.png" alt="told to use no tools, the model honestly says it cannot recall yesterday and suggests git log or the trans plugin" width="760">
+</p>
+
 ## Quick start
 
 ### Method A: one-command install via marketplace (recommended)
