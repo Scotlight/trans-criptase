@@ -2,6 +2,9 @@
 
 [English](README.en.md) | **简体中文**
 
+[![LINUX DO](https://img.shields.io/badge/LINUX%20DO-社区-ffb003?logo=discourse&logoColor=white)](https://linux.do)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > 让 Claude Code 记得住自己说过的话。
 
 Claude Code 的每个会话都会在本地留下完整转录（JSONL），但官方只给了一个 `--resume` 平铺列表——找不到、搜不了、断了接不上。transcriptase 把这堆沉睡的转录变成两样东西：**可续接的现场**，和**可检索的记忆**。
