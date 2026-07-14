@@ -1,14 +1,14 @@
 ---
 name: trans
-description: "Session transcript resume (DNA-style transcription): read a broken/old session's JSONL transcript, extract ORIGINAL TASK → DONE → BREAKPOINT → REMAINING, report, then continue. Use when the user says /trans, resume session, pick up where we left off, continue from last time, yesterday, what did we do, or provides a session UUID."
-argument-hint: "[sessionId or prefix] [tail record count, default 60]"
+description: 转录续接（DNA 式 transcription）：把中断/旧会话的 JSONL 转录读出来，提取「原任务 → 已完成 → 断点 → 剩余」，报告后接着干。当用户说「/trans / 恢复会话 / 接着上次 / 续接 xxx 会话 / resume session / 上次聊到哪了」或给出会话 UUID 要求继续时使用。
+argument-hint: "[会话ID或前缀] [尾部记录数，默认60]"
 ---
 
 # /trans — Session transcript resume
 
 DNA central dogma approach: **transcribe** (read the dead session's JSONL into intelligence) → **translate** (produce a resumption report) → **express** (continue the work). Read-only on transcript files, never modifies them.
 
-> **MCP first**: if this session has the `trans` MCP server connected (tools `trans_scan` / `trans_list` / `trans_search` / `trans_expand` / `trans_index`), call the tools directly and skip the script commands below; they are semantically equivalent, and the tools auto-refresh the index. The scripts below are a fallback when MCP is unavailable.
+> **MCP first**: if this session has the `trans` MCP server connected (tools `trans_scan` / `trans_list` / `trans_search` / `trans_expand` / `trans_index` / `trans_projects`), call the tools directly and skip the script commands below; they are semantically equivalent, and the tools auto-refresh the index. The scripts below are a fallback when MCP is unavailable.
 
 ## 1. Transcribe: run the scan script (one call, full intelligence)
 
@@ -78,5 +78,16 @@ node ...\semantic.mjs status           # index stats per project: model/dims/chu
 ```
 
 After a hit: `scan-transcript.ps1 -Id <session-prefix> -Detail <line>` to expand that section's full context.
+
+## 6. Cross-project recall: find work done in a DIFFERENT project
+
+Scenario: the user is in project B but references work done in project A — "that thing I did in the epub reader project", "上次在 xxx 仓库改的配置". The prior work lives in **A's** transcripts, which are stored under A's own encoded directory — so a default `trans_search` (current project only) will miss it, and blindly using `allProjects` re-scans every index and degrades as projects accumulate.
+
+Correct workflow — **locate first, then target one project**:
+
+1. `trans_projects()` — lists every known project by real working-directory path (read back from each transcript's `cwd` field, since the encoded directory name is lossy), newest-active first, with session count / indexed status / newest first-message preview. Pass `query` to narrow by path or preview substring.
+2. Take the target project's **exact real path** from that list and pass it to `trans_search({query, project: "<that path>"})` (or `trans_scan({project})`). This searches just that one project — no blind polling.
+
+> When MCP is available: `trans_projects({query})`. CLI fallback: `node ...\semantic.mjs projects [--query <kw>] [--limit 40]`.
 
 Key facts: vector binary is stored at `~/.claude/skills/trans/index/<project-encoded>/`, no database dependency; incremental indexing tracks per-session processed lines via `state.json`; switching embedding models triggers auto-rebuild (dimension-mismatched queries are skipped with a warning).

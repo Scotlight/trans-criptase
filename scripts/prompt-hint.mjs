@@ -28,11 +28,14 @@ process.stdin.on('end', () => {
 
     if (hasIntent(prompt)) {
       const hint = [
-        '[trans plugin] The user\'s message likely references a past session or prior work.',
-        'You have the trans_scan and trans_search MCP tools available.',
-        'Use trans_scan to retrieve a resumption brief from a recent session, or trans_search to find specific details across session history.',
-        'DO call one of these tools unless you are absolutely certain the user is NOT asking about prior session context.',
-        'Memory files alone cannot substitute for session transcript search — they only store what was explicitly saved.',
+        '[trans plugin] The user is asking about a PAST conversation / prior session work.',
+        'This information is NOT in the current workspace source code — do NOT answer by running glob/grep/cat over project files; that searches code, not past dialogue. The dialogue lives only in session transcripts, reachable via the trans MCP tools.',
+        'Before answering, your FIRST action must be one of:',
+        '• trans_search — find specific details across session history (current project by default);',
+        '• trans_scan — pull a resumption brief from a recent session.',
+        'CROSS-PROJECT: if the prior work happened in a DIFFERENT project/folder than the current one, do NOT use allProjects (it re-scans every index and degrades as projects pile up). Instead call trans_projects FIRST to locate the target project\'s real path, then pass that exact path to trans_search / trans_scan via their `project` param to search just that one project.',
+        'Only skip these tools if you are certain the user is asking about CURRENT code, not a past conversation.',
+        'Memory files alone cannot substitute for transcript search — they only store what was explicitly saved.',
       ].join(' ')
       process.stdout.write(JSON.stringify({
         hookSpecificOutput: {

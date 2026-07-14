@@ -50,6 +50,17 @@ const TOOLS = [
         },
     },
     {
+        name: 'trans_projects',
+        description: 'List all known projects (real working-directory path + recency + session count + whether indexed + newest first-message preview). Call this FIRST when the user references work done in a DIFFERENT project ("that thing I did in the A project", "在另一个项目里…", "上次在 xxx 仓库"). Cross-project workflow: 1) trans_projects to locate the target project\'s real path, 2) pass that exact path to trans_search / trans_scan via their `project` param to search just that one project. This avoids blindly polling every project with allProjects (which re-scans every index and degrades badly as projects accumulate). Optional query narrows by path/preview substring.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                query: { type: 'string', description: 'Case-insensitive substring to narrow by project path or newest-message preview; falls back to full list if nothing matches' },
+                limit: { type: 'number', description: 'Default 40' },
+            },
+        },
+    },
+    {
         name: 'trans_expand',
         description: 'Expand context around a specific transcript position: given a sessionId + line number from trans_search / trans_scan results, returns the full records around that line (including tool calls and result summaries). This is step 2 after a search hit: "found it → now read the details."',
         inputSchema: {
@@ -99,6 +110,7 @@ async function handleCall(name, a) {
         return [...notes, ...lines].join('\n')
     }
     if (name === 'trans_scan') return lib.scanLines(a).join('\n')
+    if (name === 'trans_projects') return lib.projectsLines(a).join('\n')
     if (name === 'trans_list') return lib.listLines(a).join('\n')
     if (name === 'trans_expand') return lib.expandLines(a).join('\n')
     if (name === 'trans_index') {

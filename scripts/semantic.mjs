@@ -19,6 +19,8 @@ function parseArgs(rest) {
         else if (a === '--exact') o.exact = true
         else if (a === '--semantic') o.semantic = true
         else if (a === '--no-embed') o.noEmbed = true
+        else if (a === '--limit') o.limit = parseInt(rest[++i], 10) || 40
+        else if (a === '--query') o.query = rest[++i]
         else o.texts.push(a)
     }
     return o
@@ -37,8 +39,10 @@ try {
         print(await lib.queryLines(text, opts))
     } else if (cmd === 'status') {
         print(lib.statusLines())
+    } else if (cmd === 'projects') {
+        print(lib.projectsLines(opts))
     } else {
-        console.log('用法:\n  node semantic.mjs index  [--project <路径>] [--all] [--dry] [--force] [--no-embed]\n  node semantic.mjs query "自然语言描述" [--top 8] [--project <路径>] [--all] [--exact|--semantic] [--rerank]\n  node semantic.mjs status\n默认混合检索（向量+关键词 RRF 融合）；--exact 纯关键词（无需 API）；--semantic 纯向量')
+        console.log('用法:\n  node semantic.mjs index  [--project <路径>] [--all] [--dry] [--force] [--no-embed]\n  node semantic.mjs query "自然语言描述" [--top 8] [--project <路径>] [--all] [--exact|--semantic] [--rerank]\n  node semantic.mjs projects [--query <关键词>] [--limit 40]\n  node semantic.mjs status\n默认混合检索（向量+关键词 RRF 融合）；--exact 纯关键词（无需 API）；--semantic 纯向量')
     }
 } catch (e) {
     console.error('出错: ' + e.message)

@@ -87,6 +87,64 @@ function firstUserMsg(file) {
     return '(前 400 行内无真实用户消息)'
 }
 
+// 从转录读回真实 cwd：编码目录名（非字母数字全替成 -）有损，无法反推原始路径，
+// 只能从 user 记录里的 cwd 字段读回。供跨项目发现用。
+function transcriptCwd(file) {
+    const lines = fs.readFileSync(file, 'utf8').split('\n').slice(0, 400)
+    for (const l of lines) {
+        if (!l.trim()) continue
+        let j
+        try { j = JSON.parse(l) } catch { continue }
+        if (typeof j.cwd === 'string' && j.cwd) return j.cwd
+    }
+    return null
+}
+
+// 发现所有已知项目：真实 cwd + 最近活跃时间 + 会话数 + 是否已建索引 + 最新会话首条消息。
+// 跨项目检索的第一步：AI 先调这个拿到目标项目的真实路径，再把路径传给 trans_search 的 project 参数，
+// 定向搜单个项目——而不是 allProjects 把每个项目的索引全量轮询一遍（项目一多就废）。
+export function projectsLines({ limit = 40, query = '' } = {}) {
+    if (!fs.existsSync(PROJECTS_ROOT)) return ['尚无任何项目转录目录']
+    const rows = []
+    for (const d of fs.readdirSync(PROJECTS_ROOT)) {
+        const pd = path.join(PROJECTS_ROOT, d)
+        let st
+        try { st = fs.statSync(pd) } catch { continue }
+        if (!st.isDirectory()) continue
+        const files = fs.readdirSync(pd).filter(f => f.endsWith('.jsonl')).map(f => path.join(pd, f))
+        if (!files.length) continue
+        const newest = files.map(f => ({ f, m: fs.statSync(f).mtimeMs })).sort((a, b) => b.m - a.m)[0]
+        rows.push({
+            enc: d,
+            cwd: transcriptCwd(newest.f) || `(未知路径，编码名: ${d})`,
+            sessions: files.length,
+            mtime: newest.m,
+            preview: firstUserMsg(newest.f),
+            indexed: fs.existsSync(indexPaths(d).state),
+        })
+    }
+    let filtered = rows
+    if (query && query.trim()) {
+        const q = query.trim().toLowerCase()
+        const hit = rows.filter(r => r.cwd.toLowerCase().includes(q) || r.preview.toLowerCase().includes(q))
+        if (hit.length) filtered = hit  // 有命中才收窄；无命中退回全量，避免 AI 关键词猜错就啥都看不到
+    }
+    filtered.sort((a, b) => b.mtime - a.mtime)
+    const out = [
+        '=== 已知项目（按最近活跃降序）===',
+        '跨项目检索：把下面的【路径】原样传给 trans_search / trans_scan 的 project 参数，定向搜该项目。',
+        '不要用 allProjects 轮询全部——项目多时会把每个索引都跑一遍。',
+        '',
+    ]
+    for (const r of filtered.slice(0, limit)) {
+        out.push(`• ${r.cwd}`)
+        out.push(`    ${r.sessions} 会话 / 最近 ${stampOf({ timestamp: new Date(r.mtime).toISOString() })} / 索引${r.indexed ? '已建' : '未建'}`)
+        out.push(`    最新首条: ${r.preview}`)
+    }
+    if (filtered.length > limit) out.push('', `（共 ${filtered.length} 个，只列前 ${limit}；用 query 收窄或调大 limit）`)
+    return out
+}
+
 function sessionFiles(project) {
     const dir = projectTranscriptDir(project)
     if (!fs.existsSync(dir)) throw new Error(`项目转录目录不存在：${dir}`)
