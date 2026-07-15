@@ -9,7 +9,7 @@ function send(obj) { process.stdout.write(JSON.stringify(obj) + '\n') }
 const TOOLS = [
     {
         name: 'trans_search',
-        description: 'Fuzzy-search across historical Claude Code session transcripts. Call this when the user mentions an old detail not in the current context ("last time we…", "that thing we discussed before…", "which session mentioned…"). Returns score/sessionId:line/preview; after a hit use trans_expand to pull full context. Auto incremental-refreshes the current project index before searching. mode: hybrid=vector+keyword RRF fusion (default), exact=keyword substring only (no API, good for variable names/error strings), semantic=vector only (conceptual fuzzy). Rerank score <0.5 means you missed the target — rephrase using the words actually used at the time, or switch to exact mode.',
+        description: 'Fuzzy-search across historical Claude Code AND Codex CLI session transcripts (both sources share one index per project, merged by real cwd). Call this when the user mentions an old detail not in the current context ("last time we…", "that thing we discussed before…", "which session mentioned…"). Returns score/sessionId:line/preview (each hit tagged [codex] when it comes from a Codex session); after a hit use trans_expand to pull full context. Auto incremental-refreshes the current project index before searching. mode: hybrid=vector+keyword RRF fusion (default), exact=keyword substring only (no API, good for variable names/error strings), semantic=vector only (conceptual fuzzy). Rerank score <0.5 means you missed the target — rephrase using the words actually used at the time, or switch to exact mode.',
         inputSchema: {
             type: 'object',
             properties: {
@@ -25,7 +25,7 @@ const TOOLS = [
     },
     {
         name: 'trans_scan',
-        description: 'Scan a historical session transcript and produce a five-part resumption brief: session size / compacted summary / user message thread (with line numbers) / tail overview / breakpoint detail (full Edit/Write input). The core tool for resuming interrupted sessions (/trans). Omit id to auto-pick the second-newest session (newest = current session, auto-skipped). After getting the brief, you MUST reconcile with git status / working tree before continuing.',
+        description: 'Scan a historical session transcript (Claude Code or Codex CLI — source auto-detected from the file) and produce a five-part resumption brief: session size / compacted summary / user message thread (with line numbers) / tail overview / breakpoint detail (full tool-call input). The core tool for resuming interrupted sessions (/trans). Omit id to auto-pick the second-newest session (newest = current session, auto-skipped). After getting the brief, you MUST reconcile with git status / working tree before continuing.',
         inputSchema: {
             type: 'object',
             properties: {
@@ -40,7 +40,7 @@ const TOOLS = [
     },
     {
         name: 'trans_list',
-        description: 'List candidate historical sessions for the project (mtime descending + first user message preview + size). Call this first when the user says "resume last session" but you don\'t know which one.',
+        description: 'List candidate historical sessions for the project (mtime descending + first user message preview + size), merging both Claude Code and Codex CLI sessions for that cwd (Codex ones tagged [codex]). Call this first when the user says "resume last session" but you don\'t know which one.',
         inputSchema: {
             type: 'object',
             properties: {
@@ -51,7 +51,7 @@ const TOOLS = [
     },
     {
         name: 'trans_projects',
-        description: 'List all known projects (real working-directory path + recency + session count + whether indexed + newest first-message preview). Call this FIRST when the user references work done in a DIFFERENT project ("that thing I did in the A project", "在另一个项目里…", "上次在 xxx 仓库"). Cross-project workflow: 1) trans_projects to locate the target project\'s real path, 2) pass that exact path to trans_search / trans_scan via their `project` param to search just that one project. This avoids blindly polling every project with allProjects (which re-scans every index and degrades badly as projects accumulate). Optional query narrows by path/preview substring.',
+        description: 'List all known projects (real working-directory path + recency + session count + whether indexed + newest first-message preview), merging Claude Code and Codex CLI sessions by real cwd (a project may have sessions from both). Call this FIRST when the user references work done in a DIFFERENT project ("that thing I did in the A project", "在另一个项目里…", "上次在 xxx 仓库"). Cross-project workflow: 1) trans_projects to locate the target project\'s real path, 2) pass that exact path to trans_search / trans_scan via their `project` param to search just that one project. This avoids blindly polling every project with allProjects (which re-scans every index and degrades badly as projects accumulate). Optional query narrows by path/preview substring.',
         inputSchema: {
             type: 'object',
             properties: {
@@ -62,7 +62,7 @@ const TOOLS = [
     },
     {
         name: 'trans_expand',
-        description: 'Expand context around a specific transcript position: given a sessionId + line number from trans_search / trans_scan results, returns the full records around that line (including tool calls and result summaries). This is step 2 after a search hit: "found it → now read the details."',
+        description: 'Expand context around a specific transcript position (Claude Code or Codex CLI — source auto-detected): given a sessionId + line number from trans_search / trans_scan results, returns the full records around that line (including tool calls and result summaries). This is step 2 after a search hit: "found it → now read the details."',
         inputSchema: {
             type: 'object',
             properties: {

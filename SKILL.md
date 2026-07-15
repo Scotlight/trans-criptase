@@ -10,6 +10,8 @@ DNA central dogma approach: **transcribe** (read the dead session's JSONL into i
 
 > **MCP first**: if this session has the `trans` MCP server connected (tools `trans_scan` / `trans_list` / `trans_search` / `trans_expand` / `trans_index` / `trans_projects`), call the tools directly and skip the script commands below; they are semantically equivalent, and the tools auto-refresh the index. The scripts below are a fallback when MCP is unavailable.
 
+> **Two sources, one index**: trans covers both **Claude Code** transcripts (`~/.claude/projects/<enc>/*.jsonl`) and **Codex CLI** rollouts (`~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`). Source is auto-detected per file (Codex rollouts start with a `session_meta` line), so every tool works transparently across both — no flag to set. Sessions from the same real working directory are merged into one per-project index by encoded cwd, so a search returns Claude and Codex hits side by side (Codex hits are tagged `[codex]`).
+
 ## 1. Transcribe: run the scan script (one call, full intelligence)
 
 > When MCP is available: `trans_scan({id})` is equivalent; if unsure which session to resume, call `trans_list()` first.

@@ -9,7 +9,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test test/lib.test.mjs",
+    "test": "node --test test/lib.test.mjs test/codex.test.mjs",
     "smoke": "node test/smoke.mjs"
   },
   "repository": {
