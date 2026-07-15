@@ -13,6 +13,8 @@
 
 Every Claude Code session leaves a full transcript on disk (JSONL), but all you get officially is a flat `--resume` list — you can't find, search, or resume across it. transcriptase turns those dormant transcripts into two things: **a resumable scene**, and **a searchable memory**.
 
+> **Codex CLI is supported too.** transcriptase also reads Codex's `~/.codex/sessions/**/rollout-*.jsonl` logs. The two sources are auto-detected per file and **merged into one index per project** (keyed by real working directory), so a search or resume in a project surfaces both your Claude Code and Codex history side by side — Codex hits are tagged `[codex]`. No configuration needed; it just picks up `~/.codex` if present.
+
 The name comes from reverse transcriptase: others transcribe conversations into files; we reverse-transcribe files back into live context.
 
 ## Three capabilities
@@ -286,7 +288,7 @@ query: vector dot-product top200 ─┐
 ├── .mcp.json                     plugin-level MCP declaration (not required if you use claude mcp add)
 ├── embed-config.json             your config (has the key, blocked by .gitignore)
 ├── index/                        vector index (plaintext chunks, blocked by .gitignore)
-├── scripts/                      lib.mjs / mcp-server.mjs / semantic.mjs / prompt-hint.mjs / session-end-index.mjs / scan-transcript.ps1
+├── scripts/                      lib.mjs / codex.mjs / mcp-server.mjs / semantic.mjs / prompt-hint.mjs / session-end-index.mjs / scan-transcript.ps1
 └── embedder/                     local-model option (transformers.js + your own model files)
 ```
 
@@ -304,7 +306,7 @@ HF's Xet CDN (`cas-bridge.xethub.hf.co`) denies access from some network egresse
 bge-m3-class embedding is dirt cheap: a full index of 700+ chunks is ~500K input tokens once, then incremental is nearly free; each query is ~50–200 tokens.
 
 **Q: Cross-platform?**
-The core (MCP/CLI) is pure Node, works on all three platforms. `scan-transcript.ps1` needs pwsh and is a fallback — the MCP `trans_scan` is its cross-platform equivalent.
+The core (MCP/CLI) is pure Node, works on all three platforms. This applies to Codex sessions too: discovery, parsing, indexing and search all go through the same pure-Node path (`~/.codex/sessions` resolved via `os.homedir()`, no hardcoded separators or `.exe`). `scan-transcript.ps1` needs pwsh and is a fallback — the MCP `trans_scan` is its cross-platform equivalent.
 
 ## License
 
